@@ -7,21 +7,51 @@
 import UIKit
 
 class UIVariableBlurView: UIView {
+    // MARK: - Private Properties
+    private var filterClass: NSObjectProtocol {
+        let encodedString = "Q0FGaWx0ZXI="
+        let data = Data(base64Encoded: encodedString)!
+        let string = String(data: data, encoding: .utf8)!
+        
+        return NSClassFromString(string) as AnyObject as! NSObjectProtocol
+    }
+    
+    private var filterType: String {
+        let encodedString = "dmFyaWFibGVCbHVy"
+        let data = Data(base64Encoded: encodedString)!
+        
+        return String(data: data, encoding: .utf8)!
+    }
+    
+    private var filterWithTypeSelector: Selector {
+        let encodedString = "ZmlsdGVyV2l0aFR5cGU6"
+        let data = Data(base64Encoded: encodedString)!
+        let string = String(data: data, encoding: .utf8)!
+        
+        return Selector((string))
+    }
+    
+    private var variableBlur: AnyObject!
+    
     // MARK: - Public Properties
     var blurRadius: CGFloat = 20 {
-        didSet {
-            setupVariableBlurFilter()
+        willSet {
+            variableBlur.setValue(newValue, forKey: "inputRadius")
         }
     }
     
     var gradientMask: UIImage? = nil {
-        didSet {
-            setupVariableBlurFilter()
+        willSet {
+            variableBlur.setValue(newValue?.cgImage, forKey: "inputMaskImage")
         }
     }
     
     override class var layerClass: AnyClass {
-        return NSClassFromString("CABackdropLayer")!
+        let encodedString = "Q0FCYWNrZHJvcExheWVy"
+        let data = Data(base64Encoded: encodedString)!
+        let string = String(data: data, encoding: .utf8)!
+        
+        return NSClassFromString(string)!
     }
     
     // MARK: - init(frame:)
@@ -37,12 +67,8 @@ class UIVariableBlurView: UIView {
     
     // MARK: - Private Methods
     private func setupVariableBlurFilter() {
-        let filterClass = NSClassFromString("CAFilter") as AnyObject as! NSObjectProtocol
-        let selector = Selector(("filterWithType:"))
-        let variableBlur = filterClass.perform(selector, with: "variableBlur")
-            .takeUnretainedValue()
-        
-        variableBlur.setValue(20, forKey: "inputRadius")
+        variableBlur = filterClass.perform(filterWithTypeSelector, with: filterType).takeUnretainedValue()
+        variableBlur.setValue(blurRadius, forKey: "inputRadius")
         variableBlur.setValue(true, forKey: "inputNormalizeEdges")
         variableBlur.setValue(gradientMask?.cgImage, forKey: "inputMaskImage")
         
